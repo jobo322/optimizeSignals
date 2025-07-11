@@ -1,0 +1,43 @@
+{
+  "name": "optimizeROI",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib/index.d.ts",
+  "keywords": [],
+  "author": "jobo322",
+  "license": "MIT",
+  "files": [
+    "src",
+    "lib",
+    "lib-esm"
+  ],
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "clean": "rimraf lib lib-esm",
+    "eslint": "eslint src --cache",
+    "eslint-fix": "npm run eslint -- --fix",
+    "prepack": "npm run tsc",
+    "prettier": "prettier --check src",
+    "prettier-write": "prettier --write src",
+    "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
+    "test-only": "jest --coverage",
+    "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
+    "tsc-cjs": "tsc --project tsconfig.cjs.json",
+    "tsc-esm": "tsc --project tsconfig.esm.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jobo322/optimizeROI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jobo322/optimizeROI/issues"
+  },
+  "homepage": "https://github.com/jobo322/optimizeROI#readme",
+  "dependencies": {
+    "ml-levenberg-marquardt": "^5.0.0",
+    "ml-peak-shape-generator": "^4.2.0",
+    "ml-spectra-processing": "^14.13.0"
+  }
+}
