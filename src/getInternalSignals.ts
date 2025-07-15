@@ -1,15 +1,16 @@
+import { getShape1D, Shape1D } from 'ml-peak-shape-generator';
+import { DefaultParameters } from './utils/DefaultParameters.js';
 import {
-  getShape1D,
-  Shape1D,
-  Shape1DClass,
-  Shape1DInstance,
-} from 'ml-peak-shape-generator';
-import { DefaultParameters } from './utils/DefaultParameters';
-import { GetInternalSignalsOptions, MinMaxRange, ParameterNames, Signal, SignalWithShape } from './types';
+  GetInternalSignalsOptions,
+  MinMaxRange,
+  ParameterNames,
+  SignalWithShape,
+} from './types';
 
 const properties: Properties[] = ['init', 'min', 'max', 'gradientDifference'];
 type Properties = 'init' | 'min' | 'max' | 'gradientDifference';
 type PropertiesValues = Record<Properties, number[]>;
+
 export function getInternalSignals(
   signals: SignalWithShape<Shape1D>[],
   minMaxRangeY: MinMaxRange,
@@ -22,7 +23,11 @@ export function getInternalSignals(
     const shape = signal.shape;
     const shapeFct = getShape1D(shape);
 
-    const shapeParameters: ParameterNames<Shape1D> = ['x', 'y', ...shapeFct.getParameters()];
+    const shapeParameters: ParameterNames<Shape1D> = [
+      'x',
+      'y',
+      ...shapeFct.getParameters(),
+    ];
 
     if (constants.every((c) => shapeParameters.includes(c))) {
       throw Error(
@@ -30,15 +35,7 @@ export function getInternalSignals(
       );
     }
 
-    const parameters = shapeParameters.filter(
-      (p) => constants.indexOf(p) < 0,
-    );
-
-    const { x: constantX, y: constantY, ...restConstants } = constants;
-    for (const key in restConstants) {
-      //@ts-expect-error I am checking before than constants only contains shape parameters
-      shapeFct[key] = constants[key];
-    }
+    const parameters = shapeParameters.filter((p) => constants.indexOf(p) < 0);
 
     const propertiesValues: PropertiesValues = {
       min: [],
@@ -91,21 +88,17 @@ export function getInternalSignals(
             continue;
           }
         }
-
-        // we just need to take the default parameters
-        // assert(
-        //   DefaultParameters[parameter],
-        //   `No default parameter for ${parameter}`,
-        // );
+        //@ts-expect-error TODO: handle or add type to DefaultParameters
         const defaultParameterValues = DefaultParameters[parameter][property];
-        //@ts-expect-error should never happen
-        propertiesValues[property].push(defaultParameterValues(signal, shapeFct));
+        propertiesValues[property].push(
+          defaultParameterValues(signal, shapeFct),
+        );
       }
     }
 
     const fromIndex = index;
-    const xIndex = parameters.findIndex('x');
-    const yIndex = parameters.findIndex('y');
+    const xIndex = parameters.indexOf('x');
+    const yIndex = parameters.indexOf('y');
     const toIndex = fromIndex + parameters.length - 1;
     index += toIndex - fromIndex + 1;
 
@@ -141,11 +134,9 @@ function getNormalizedValue(
   return value;
 }
 
-function getParameterByKey(
-  parameterKey: string,
-  property: string,
-  signal: SignalWithShape<Shape1D>,
-): any {
-  if ()
-  return signal?.parameters?.[parameterKey]?.[property];
+function getParameterByKey<
+  T extends GetInternalSignalsOptions = GetInternalSignalsOptions,
+>(parameterKey: string, property: string, options: T): any {
+  // @ts-expect-error TODO: handle the types correctly
+  return options.parameters?.[parameterKey]?.[property];
 }
