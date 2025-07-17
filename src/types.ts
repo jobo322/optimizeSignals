@@ -1,4 +1,4 @@
-import { Shape1D } from 'ml-peak-shape-generator';
+import { Shape1D, Shape1DInstance } from 'ml-peak-shape-generator';
 
 export interface MinMaxRange {
   min: number;
@@ -17,6 +17,9 @@ interface ParametersLimits {
   max: number;
   gradientDifference: number;
 }
+
+export type Properties = 'init' | 'min' | 'max' | 'gradientDifference';
+export type PropertiesValues = Record<Properties, number[]>;
 
 type ConstantsObject<T extends { kind: string }> =
   | {
@@ -53,7 +56,7 @@ export type Signal<T extends Shape1D = Shape1D> = {
   shape?: T;
   pattern?: SignalPattern[];
   parameters?: SignalParameters<T>;
-  constants?: Array<ConstantsObject<Shape1D>[T['kind']] | 'x' | 'y'>;
+  constants?: ParameterNames<T>;
 };
 
 export type SignalWithShape<T extends Shape1D> = {
@@ -62,21 +65,24 @@ export type SignalWithShape<T extends Shape1D> = {
   shape: T;
   pattern?: SignalPattern[];
   parameters?: SignalParameters<T>;
-  constants: Array<ConstantsObject<Shape1D>[T['kind']] | 'x' | 'y'>;
+  constants?: ParameterNames<T>;
 };
 
-export type InternalSignal<T extends Shape1D> = {
+export type InternalSignal<T extends Shape1D = Shape1D> = {
   x: number;
   y: number;
-  toIndex: number;
+  xIndex: number;
+  yIndex: number;
   fromIndex: number;
   shape: T;
+  shapeFct: Shape1DInstance;
   pattern: SignalPattern[];
   parameterNames: ParameterNames<T>;
-  constants: Array<ConstantsObject<T>[T['kind']] | 'x' | 'y'>;
-  propertiesValues: SignalParameters<T>;
+  constants: ParameterNames<T>;
+  propertiesValues: PropertiesValues;
 };
 
 export type GetInternalSignalsOptions<T extends Shape1D = Shape1D> = {
+  constants?: ParameterNames<T>;
   parameters?: SignalParameters<T>;
 };

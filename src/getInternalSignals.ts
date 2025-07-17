@@ -2,41 +2,44 @@ import { getShape1D, Shape1D } from 'ml-peak-shape-generator';
 import { DefaultParameters } from './utils/DefaultParameters.js';
 import {
   GetInternalSignalsOptions,
+  InternalSignal,
   MinMaxRange,
   ParameterNames,
+  Properties,
+  PropertiesValues,
   SignalWithShape,
 } from './types';
 
 const properties: Properties[] = ['init', 'min', 'max', 'gradientDifference'];
-type Properties = 'init' | 'min' | 'max' | 'gradientDifference';
-type PropertiesValues = Record<Properties, number[]>;
 
-export function getInternalSignals(
-  signals: SignalWithShape<Shape1D>[],
+export function getInternalSignals<T extends Shape1D = Shape1D>(
+  signals: SignalWithShape<T>[],
   minMaxRangeY: MinMaxRange,
-  options: GetInternalSignalsOptions<Shape1D> = {},
+  options: GetInternalSignalsOptions<T> = {},
 ) {
   let index = 0;
-  let internalPeaks = [];
+  let internalPeaks: InternalSignal<Shape1D>[] = [];
   for (const signal of signals) {
-    const { pattern = [{ x: 0, y: 1 }], constants } = signal;
+    const { pattern = [{ x: 0, y: 1 }], constants = [] } = signal;
     const shape = signal.shape;
     const shapeFct = getShape1D(shape);
 
-    const shapeParameters: ParameterNames<Shape1D> = [
+    const shapeParameters: ParameterNames<T> = [
       'x',
       'y',
       ...shapeFct.getParameters(),
     ];
 
-    if (constants.every((c) => shapeParameters.includes(c))) {
+    if (
+      constants.length &&
+      !constants.every((c) => shapeParameters.includes(c))
+    ) {
       throw Error(
         `Some defined constant is not a parameter of the shape: ${shape.kind}`,
       );
     }
 
     const parameters = shapeParameters.filter((p) => constants.indexOf(p) < 0);
-
     const propertiesValues: PropertiesValues = {
       min: [],
       max: [],
@@ -44,10 +47,11 @@ export function getInternalSignals(
       gradientDifference: [],
     };
 
-    for (let parameter of parameters) {
+    for (const parameter of parameters) {
       for (let property of properties) {
         // check if the property is specified in the peak
         let propertyValue = getParameterByKey(parameter, property, signal);
+
         if (propertyValue) {
           propertyValue = getNormalizedValue(
             propertyValue,
@@ -66,6 +70,7 @@ export function getInternalSignals(
           property,
           options,
         );
+
         if (generalParameterValue) {
           if (typeof generalParameterValue === 'number') {
             generalParameterValue = getNormalizedValue(
@@ -90,9 +95,11 @@ export function getInternalSignals(
         }
         //@ts-expect-error TODO: handle or add type to DefaultParameters
         const defaultParameterValues = DefaultParameters[parameter][property];
+
         propertiesValues[property].push(
           defaultParameterValues(signal, shapeFct),
         );
+        if (parameter === 'x') console.log(propertiesValues[property]);
       }
     }
 
@@ -101,18 +108,19 @@ export function getInternalSignals(
     const yIndex = parameters.indexOf('y');
     const toIndex = fromIndex + parameters.length - 1;
     index += toIndex - fromIndex + 1;
-
+    console.log(xIndex, yIndex);
     internalPeaks.push({
+      x: signal.x,
+      y: (signal.y - minMaxRangeY.min) / minMaxRangeY.range, // normalize y to ensure a good result when y would keep constant
       shape,
       pattern,
       shapeFct,
-      parameters,
+      parameterNames: parameters,
       constants,
       xIndex,
       yIndex,
       propertiesValues,
       fromIndex,
-      toIndex,
     });
   }
   return internalPeaks;
