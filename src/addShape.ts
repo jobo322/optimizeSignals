@@ -1,16 +1,19 @@
 import { Shape1D } from 'ml-peak-shape-generator';
-import { Signal, SignalWithShape } from './types';
+import { ParameterNames, Signal, SignalWithShape } from './types';
 
 export function addShape<T extends Shape1D = Shape1D>(
   shape: T,
+  constants: ParameterNames<T>,
   signalInput: Signal<T>,
 ): SignalWithShape<T>;
 export function addShape<T extends Shape1D = Shape1D>(
   shape: T,
+  constants: ParameterNames<T>,
   signalInput?: undefined,
 ): (signal: Signal<T>) => SignalWithShape<T>;
 export function addShape<T extends Shape1D = Shape1D>(
   shape: T,
+  constants: ParameterNames<T>,
   signalInput?: Signal<T>,
 ): SignalWithShape<T> | ((signal: Signal<T>) => SignalWithShape<T>) {
   const fct: (signal: Signal<T>) => SignalWithShape<T> = (
@@ -26,7 +29,9 @@ export function addShape<T extends Shape1D = Shape1D>(
     return {
       ...signal,
       shape: { ...shape, ...signal.shape },
-      constants: [],
+      constants: Array.from(
+        new Set([...constants, ...(signal.constants || [])]),
+      ),
     };
   };
   if (signalInput) {
