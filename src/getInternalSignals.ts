@@ -18,28 +18,27 @@ export function getInternalSignals<T extends Shape1D = Shape1D>(
   options: GetInternalSignalsOptions<T> = {},
 ) {
   let index = 0;
-  let internalPeaks: InternalSignal<Shape1D>[] = [];
+  let internalPeaks: InternalSignal<T>[] = [];
   for (const signal of signals) {
     const { pattern = [{ x: 0, y: 1 }], constants = [] } = signal;
     const shape = signal.shape;
     const shapeFct = getShape1D(shape);
 
-    const shapeParameters: ParameterNames<T> = [
-      'x',
-      'y',
-      ...shapeFct.getParameters(),
-    ];
+    const shapeParameters = ['x', 'y', ...shapeFct.getParameters()];
 
     if (
       constants.length &&
-      !constants.every((c) => shapeParameters.includes(c))
+      !constants.every((c) => shapeParameters.includes(c as string))
     ) {
       throw Error(
         `Some defined constant is not a parameter of the shape: ${shape.kind}`,
       );
     }
 
-    const parameters = shapeParameters.filter((p) => constants.indexOf(p) < 0);
+    const parameters = shapeParameters.filter(
+      //@ts-expect-error shapeParameter is internal, the input type is ensured
+      (p) => constants.indexOf(p) < 0,
+    );
     const propertiesValues: PropertiesValues = {
       min: [],
       max: [],
@@ -50,7 +49,7 @@ export function getInternalSignals<T extends Shape1D = Shape1D>(
     for (const parameter of parameters) {
       for (let property of properties) {
         // check if the property is specified in the peak
-        let propertyValue = getParameterByKey(parameter, property, signal);
+        let propertyValue = getParameterByKey<T>(parameter, property, signal);
 
         if (propertyValue) {
           propertyValue = getNormalizedValue(
@@ -108,14 +107,13 @@ export function getInternalSignals<T extends Shape1D = Shape1D>(
     const yIndex = parameters.indexOf('y');
     const toIndex = fromIndex + parameters.length - 1;
     index += toIndex - fromIndex + 1;
-    console.log(xIndex, yIndex);
     internalPeaks.push({
       x: signal.x,
       y: (signal.y - minMaxRangeY.min) / minMaxRangeY.range, // normalize y to ensure a good result when y would keep constant
       shape,
       pattern,
       shapeFct,
-      parameterNames: parameters,
+      parameterNames: parameters as ParameterNames<T>,
       constants,
       xIndex,
       yIndex,
@@ -142,9 +140,11 @@ function getNormalizedValue(
   return value;
 }
 
-function getParameterByKey<
-  T extends GetInternalSignalsOptions = GetInternalSignalsOptions,
->(parameterKey: string, property: string, options: T): any {
+function getParameterByKey<S extends Shape1D>(
+  parameterKey: string,
+  property: string,
+  options: GetInternalSignalsOptions<S>,
+): any {
   // @ts-expect-error TODO: handle the types correctly
   return options.parameters?.[parameterKey]?.[property];
 }
