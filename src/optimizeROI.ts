@@ -1,12 +1,4 @@
-import { xMinMaxValues } from 'ml-spectra-processing';
-import { getInternalSignals } from './getInternalSignals';
-import {
-  GetInternalSignalsOptions,
-  InternalSignal,
-  MinMaxRange,
-  Signal,
-} from './types';
-import { addShape } from './addShape';
+import { InternalSignal, MinMaxRange } from './types';
 import { Shape1D } from 'ml-peak-shape-generator';
 //@ts-expect-error should be a type there
 import { levenbergMarquardt } from 'ml-levenberg-marquardt';
@@ -23,6 +15,7 @@ const defaultOptimizationOptions: OptimizationOptions = {
   maxIterations: 100,
   errorTolerance: 1e-8,
 };
+
 interface OptimizationOptions {
   damping?: number;
   maxIterations?: number;
@@ -33,9 +26,9 @@ interface OptimizeROIOptions {
   minMaxYRange: MinMaxRange;
 }
 
-export function optimizeROI(
+export function optimizeROI<T extends Shape1D>(
   data: DataXY,
-  internalSignals: InternalSignal[],
+  internalSignals: InternalSignal<T>[],
   options: OptimizeROIOptions,
 ) {
   const { optimization = {}, minMaxYRange } = options;
@@ -107,7 +100,9 @@ export function optimizeROI(
   return newSignals;
 }
 
-function getSumOfShapes(internalSignals: InternalSignal<Shape1D>[]) {
+function getSumOfShapes<T extends Shape1D>(
+  internalSignals: InternalSignal<T>[],
+) {
   return function sumOfShapes(parameters: number[]) {
     return (currentX: number) => {
       let totalY = 0;
