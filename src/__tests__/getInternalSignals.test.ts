@@ -36,7 +36,7 @@ test('test myModule', () => {
   // check the convergence of fwhm.
   const temp = xMinMaxValues(spectrum.y);
   const minMaxYRange = { ...temp, range: temp.max - temp.min };
-  const shaper = addShape({ kind: 'gaussian', fwhm: 0.02 }, ['fwhm', 'y']);
+  const shaper = addShape({ kind: 'gaussian', fwhm: 0.02 }, []);
   const signalWithShape = signals.map(shaper);
 
   const internalSignals = getInternalSignals(signalWithShape, minMaxYRange, {
