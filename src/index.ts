@@ -1,3 +1,3 @@
 export * from './getInternalSignals';
-export * from './optimizeROI';
+export * from './optimizeSignals';
 export * from './addShape';

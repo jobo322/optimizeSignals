@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import { getInternalSignals } from '../getInternalSignals';
 import { addShape } from '../addShape';
-import { optimizeROI } from '../optimizeROI';
+import { optimizeSignals } from '../optimizeSignals';
 import { generateSpectrum } from 'spectrum-generator';
 import { Signal } from '../types';
 import { xMinMaxValues } from 'ml-spectra-processing';
@@ -45,7 +45,7 @@ test('test myModule', () => {
     },
   });
 
-  const result = optimizeROI(spectrum, internalSignals, {
+  const result = optimizeSignals(spectrum, internalSignals, {
     minMaxYRange,
     optimization: { maxIterations: 100 },
   });

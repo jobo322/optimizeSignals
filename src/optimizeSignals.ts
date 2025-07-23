@@ -21,15 +21,15 @@ interface OptimizationOptions {
   maxIterations?: number;
   errorTolerance?: number;
 }
-interface OptimizeROIOptions {
+interface optimizeSignalsOptions {
   optimization?: OptimizationOptions;
   minMaxYRange: MinMaxRange;
 }
 
-export function optimizeROI<T extends Shape1D>(
+export function optimizeSignals<T extends Shape1D>(
   data: DataXY,
   internalSignals: InternalSignal<T>[],
-  options: OptimizeROIOptions,
+  options: optimizeSignalsOptions,
 ) {
   const { optimization = {}, minMaxYRange } = options;
 

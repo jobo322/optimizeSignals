@@ -1,5 +1,5 @@
 {
-  "name": "optimizeROI",
+  "name": "optimizeSignals",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
@@ -29,12 +29,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jobo322/optimizeROI.git"
+    "url": "git+https://github.com/jobo322/optimizeSignals.git"
   },
   "bugs": {
-    "url": "https://github.com/jobo322/optimizeROI/issues"
+    "url": "https://github.com/jobo322/optimizeSignals/issues"
   },
-  "homepage": "https://github.com/jobo322/optimizeROI#readme",
+  "homepage": "https://github.com/jobo322/optimizeSignals#readme",
   "dependencies": {
     "ml-levenberg-marquardt": "^5.0.0",
     "ml-peak-shape-generator": "^4.2.0",
